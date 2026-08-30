@@ -4,13 +4,17 @@ import {
   ChevronDown,
   ChevronUp,
   Mail,
+  Phone,
   Trash2,
   UsersRound,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
-import DashboardLayout from '../../components/dashboard/DashboardLayout'
+
+import { Card, CardHeader } from '../../components/ui/Card'
+import { CustomDatePicker } from '../../components/ui/CustomDatePicker'
+import { Button } from '../../components/ui/Button'
 import { checkinApi, type CheckinHistoryEntry, type MissionaryProfile } from '../../lib/checkinApi'
 import { BAND_COLORS, BAND_LABELS, DIMENSION_LABELS } from '../../lib/checkinLabels'
 import { ApiError } from '../../lib/api'
@@ -50,46 +54,33 @@ function DateRangeFilter({
   const activePreset = PRESETS.find((p) => from === isoDaysAgo(p.days) && to === isoToday())
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-brand-100 bg-white p-3 shadow-sm">
-      {PRESETS.map((p) => (
-        <button
-          key={p.label}
-          onClick={() => onChange(isoDaysAgo(p.days), isoToday())}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activePreset?.label === p.label
-              ? 'bg-brand-600 text-white'
-              : 'bg-brand-50 text-slate-600 hover:bg-brand-100'
-          }`}
-        >
-          {p.label}
-        </button>
-      ))}
-
-      <div className="ml-auto flex flex-wrap items-center gap-2 text-sm">
-        <input
-          type="date"
-          value={customFrom}
-          max={customTo}
-          onChange={(e) => setCustomFrom(e.target.value)}
-          className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-600"
-        />
-        <span className="text-slate-400">até</span>
-        <input
-          type="date"
-          value={customTo}
-          min={customFrom}
-          max={isoToday()}
-          onChange={(e) => setCustomTo(e.target.value)}
-          className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-600"
-        />
-        <button
-          onClick={() => onChange(customFrom, customTo)}
-          className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200"
-        >
-          Aplicar
-        </button>
+    <Card className="shadow-sm border border-slate-100 flex flex-wrap items-center gap-3 p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        {PRESETS.map((p) => (
+          <Button
+            key={p.label}
+            size="sm"
+            variant={activePreset?.label === p.label ? 'primary' : 'secondary'}
+            onClick={() => onChange(isoDaysAgo(p.days), isoToday())}
+          >
+            {p.label}
+          </Button>
+        ))}
       </div>
-    </div>
+
+      <div className="ml-auto flex flex-wrap items-end gap-2">
+        <div className="w-36">
+          <CustomDatePicker value={customFrom} onChange={setCustomFrom} placeholder="De" />
+        </div>
+        <span className="pb-3 text-slate-400">até</span>
+        <div className="w-36">
+          <CustomDatePicker value={customTo} onChange={setCustomTo} placeholder="Até" align="right" />
+        </div>
+        <Button size="sm" variant="secondary" onClick={() => onChange(customFrom, customTo)}>
+          Aplicar
+        </Button>
+      </div>
+    </Card>
   )
 }
 
@@ -146,7 +137,7 @@ function CheckinCard({
   }
 
   return (
-    <div className="rounded-2xl border border-brand-100 bg-white shadow-sm">
+    <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-3 p-4">
         <button
           onClick={() => setOpen((v) => !v)}
@@ -208,7 +199,7 @@ function CheckinCard({
       {deleteError && <p className="px-4 pb-2 text-xs text-red-600">{deleteError}</p>}
 
       {open && (
-        <div className="border-t border-brand-50 p-4">
+        <div className="border-t border-slate-50 p-4">
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
             {checkin.dimensions.map((d) => (
               <div
@@ -265,14 +256,14 @@ export default function MissionaryProfilePage() {
 
   if (error) {
     return (
-      <DashboardLayout>
-        <div className="rounded-2xl border border-brand-100 bg-white p-6 text-center shadow-sm">
+      <>
+        <Card className="shadow-sm border border-slate-100 text-center">
           <p className="text-sm text-red-600">{error}</p>
           <Link to="/home" className="mt-3 inline-block text-sm text-brand-600 hover:underline">
             Voltar
           </Link>
-        </div>
-      </DashboardLayout>
+        </Card>
+      </>
     )
   }
 
@@ -291,18 +282,27 @@ export default function MissionaryProfilePage() {
       : 0
 
   return (
-    <DashboardLayout>
-      <div className="mb-5 rounded-2xl border border-brand-100 bg-white p-5 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900">{profile.missionary.fullName}</h1>
-        <div className="mt-2 flex flex-wrap gap-4 text-sm text-slate-500">
+    <>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white tracking-tight">{profile.missionary.fullName}</h1>
+        <div className="mt-2 flex flex-wrap gap-4 text-sm font-medium text-white/80">
           <span className="inline-flex items-center gap-1.5">
             <Mail size={14} />
             {profile.missionary.email}
           </span>
+          {profile.missionary.phone && (
+            <span className="inline-flex items-center gap-1.5">
+              <Phone size={14} />
+              {profile.missionary.phone}
+            </span>
+          )}
           {profile.group && (
             <span className="inline-flex items-center gap-1.5">
               <UsersRound size={14} />
-              {profile.group.name} · líder {profile.group.leaderName}
+              {profile.group.name}
+              {profile.group.leaderNames.length > 0
+                ? ` · líder(es) ${profile.group.leaderNames.join(', ')}`
+                : ' · sem líder atribuído'}
             </span>
           )}
         </div>
@@ -313,21 +313,21 @@ export default function MissionaryProfilePage() {
       </div>
 
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
+        <Card className="shadow-sm border border-slate-100 p-4">
           <p className="text-xs text-slate-500">Score médio</p>
           <p className="mt-1 text-2xl font-bold text-slate-900">{profile.averages.overallAvg ?? '—'}</p>
-        </div>
+        </Card>
         {profile.averages.dimensions.map((d) => (
-          <div key={d.dimension} className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
+          <Card key={d.dimension} className="shadow-sm border border-slate-100 p-4">
             <p className="text-xs text-slate-500">{DIMENSION_LABELS[d.dimension]}</p>
             <p className="mt-1 text-2xl font-bold text-slate-900">{d.avg}</p>
-          </div>
+          </Card>
         ))}
       </div>
 
       <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm lg:col-span-2 sm:p-6">
-          <h2 className="text-base font-semibold text-slate-900">Score no período</h2>
+        <Card className="shadow-sm border border-slate-100 lg:col-span-2">
+          <CardHeader title="Score no período" className="mb-2" />
           <div className="mt-4 h-48 sm:h-56">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trendData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
@@ -358,9 +358,9 @@ export default function MissionaryProfilePage() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm sm:p-6">
+        <Card className="shadow-sm border border-slate-100">
           <div className="flex items-center gap-2 text-slate-900">
             <CalendarX size={18} className="text-amber-600" />
             <h2 className="text-base font-semibold">Dias sem check-in</h2>
@@ -386,7 +386,7 @@ export default function MissionaryProfilePage() {
               )}
             </div>
           )}
-        </div>
+        </Card>
       </div>
 
       {profile.careEvents.length > 0 && (
@@ -394,7 +394,7 @@ export default function MissionaryProfilePage() {
           <h2 className="mb-3 text-base font-semibold text-slate-900">Eventos de cuidado</h2>
           <div className="space-y-2">
             {profile.careEvents.map((ce) => (
-              <div key={ce.id} className="rounded-xl border border-brand-100 bg-white p-3 text-sm shadow-sm">
+              <Card key={ce.id} className="shadow-sm border border-slate-100 p-3 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -412,7 +412,7 @@ export default function MissionaryProfilePage() {
                 </div>
                 <p className="mt-1 text-slate-600">{ce.reason}</p>
                 {ce.closingNote && <p className="mt-1 text-xs text-slate-400">Nota: {ce.closingNote}</p>}
-              </div>
+              </Card>
             ))}
           </div>
         </div>
@@ -434,11 +434,11 @@ export default function MissionaryProfilePage() {
           />
         ))}
         {profile.checkins.length === 0 && (
-          <p className="rounded-2xl border border-dashed border-brand-200 bg-white p-6 text-center text-sm text-slate-400">
+          <p className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-400">
             Nenhum check-in neste período.
           </p>
         )}
       </div>
-    </DashboardLayout>
+    </>
   )
 }

@@ -1,6 +1,8 @@
 import { CheckCircle2, HeartHandshake, Phone } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
 import {
   checkinApi,
   type QuestionOption,
@@ -15,7 +17,7 @@ type Phase = 'loading' | 'already-done' | 'quiz' | 'submitting' | 'critical' | '
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-brand-50 px-4 py-8">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
       <div className="w-full max-w-lg">{children}</div>
     </div>
   )
@@ -137,12 +139,12 @@ export default function QuestPage() {
   if (phase === 'error') {
     return (
       <Shell>
-        <div className="rounded-2xl bg-white p-6 text-center shadow-sm">
+        <Card className="shadow-sm border border-slate-100 text-center">
           <p className="text-sm text-red-600">Não foi possível carregar o quest de hoje.</p>
           <Link to="/home" className="mt-3 inline-block text-sm text-brand-600 hover:underline">
             Voltar
           </Link>
-        </div>
+        </Card>
       </Shell>
     )
   }
@@ -150,19 +152,16 @@ export default function QuestPage() {
   if (phase === 'already-done') {
     return (
       <Shell>
-        <div className="rounded-2xl bg-white p-6 text-center shadow-sm">
+        <Card className="shadow-sm border border-slate-100 text-center">
           <CheckCircle2 className="mx-auto text-brand-600" size={32} />
           <h1 className="mt-3 text-lg font-semibold text-slate-900">
             Você já respondeu o quest de hoje!
           </h1>
           <p className="mt-1 text-sm text-slate-500">Volte amanhã para continuar sua sequência.</p>
-          <button
-            onClick={() => navigate('/home')}
-            className="mt-4 rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
-          >
+          <Button onClick={() => navigate('/home')} className="mt-4 rounded-full">
             Voltar para o início
-          </button>
-        </div>
+          </Button>
+        </Card>
       </Shell>
     )
   }
@@ -170,7 +169,7 @@ export default function QuestPage() {
   if (phase === 'critical' && result) {
     return (
       <Shell>
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <Card className="shadow-sm border border-slate-100">
           <div className="flex items-center gap-2 text-red-600">
             <HeartHandshake size={22} />
             <h1 className="text-lg font-bold">{result.criticalSupport?.title}</h1>
@@ -179,18 +178,15 @@ export default function QuestPage() {
             {result.criticalSupport?.message}
           </p>
           <div className="mt-5 space-y-2">
-            <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700">
-              <Phone size={16} />
+            <Button variant="danger" className="w-full">
+              <Phone size={16} className="mr-2" />
               Preciso conversar agora
-            </button>
-            <button
-              onClick={() => navigate('/home')}
-              className="w-full rounded-xl bg-slate-100 py-3 text-sm font-medium text-slate-600 hover:bg-slate-200"
-            >
+            </Button>
+            <Button variant="secondary" onClick={() => navigate('/home')} className="w-full">
               Voltar para o início
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       </Shell>
     )
   }
@@ -198,7 +194,7 @@ export default function QuestPage() {
   if (phase === 'result' && result) {
     return (
       <Shell>
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <Card className="shadow-sm border border-slate-100">
           <div className="text-center">
             <p className="text-sm font-medium text-slate-500">Seu score de hoje</p>
             <p className="text-5xl font-bold text-slate-900">{result.overallScore}</p>
@@ -226,13 +222,10 @@ export default function QuestPage() {
             </div>
           )}
 
-          <button
-            onClick={() => navigate('/home')}
-            className="mt-5 w-full rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white hover:bg-brand-700"
-          >
+          <Button onClick={() => navigate('/home')} className="mt-5 w-full">
             Voltar para o início
-          </button>
-        </div>
+          </Button>
+        </Card>
       </Shell>
     )
   }
@@ -256,7 +249,7 @@ export default function QuestPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <Card className="shadow-sm border border-slate-100">
         <h1 className="text-lg font-semibold text-slate-900">{currentQuestion.text}</h1>
 
         {isOpenText ? (
@@ -282,14 +275,15 @@ export default function QuestPage() {
 
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
-        <button
+        <Button
           onClick={handleNext}
-          disabled={!canAdvance || phase === 'submitting'}
-          className="mt-5 w-full rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-40"
+          disabled={!canAdvance}
+          isLoading={phase === 'submitting'}
+          className="mt-5 w-full"
         >
           {phase === 'submitting' ? 'Enviando…' : isLastQuestion ? 'Ver resultado' : 'Próxima'}
-        </button>
-      </div>
+        </Button>
+      </Card>
     </Shell>
   )
 }

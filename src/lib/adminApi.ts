@@ -14,10 +14,13 @@ export interface Institution {
   createdAt: string
 }
 
+export type WebhookEventType = 'INVITE_CREATED' | 'SCORE_ALERT'
+
 export interface WebhookConfig {
-  url: string
+  event: WebhookEventType
+  url: string | null
   active: boolean
-  updatedAt: string
+  updatedAt: string | null
 }
 
 export interface Member {
@@ -25,6 +28,7 @@ export interface Member {
   fullName: string
   preferredName: string | null
   email: string
+  phone: string | null
   role: 'INSTITUTION_ADMIN' | 'LEADER' | 'MISSIONARY'
   group?: { id: string; name: string } | null
 }
@@ -35,7 +39,7 @@ export interface Group {
   description: string | null
   locality: string | null
   status: 'ACTIVE' | 'INACTIVE'
-  leader: { id: string; fullName: string }
+  leaders: { id: string; fullName: string }[]
   memberCount: number
 }
 
@@ -45,9 +49,9 @@ export interface GroupDetail {
   description: string | null
   locality: string | null
   status: 'ACTIVE' | 'INACTIVE'
-  leader: { id: string; fullName: string; email: string }
+  leaders: { id: string; fullName: string; email: string }[]
   members: { id: string; fullName: string; email: string }[]
-  canReassignLeader: boolean
+  canManageLeaders: boolean
 }
 
 export interface InviteSummary {
@@ -74,9 +78,12 @@ export const adminApi = {
   }) => api.post<Institution>('/institutions', dto),
   getInstitution: (institutionId: string) => api.get<Institution>(`/institutions/${institutionId}`),
 
-  getWebhookConfig: () => api.get<WebhookConfig | null>('/webhook-config'),
-  configureWebhook: (url: string) =>
-    api.put<{ url: string; active: boolean; secret: string }>('/webhook-config', { url }),
+  listWebhookConfigs: () => api.get<WebhookConfig[]>('/webhook-config'),
+  configureWebhook: (event: WebhookEventType, url: string) =>
+    api.put<{ event: WebhookEventType; url: string; active: boolean; secret: string }>('/webhook-config', {
+      event,
+      url,
+    }),
 
   listMembers: (institutionId: string, role?: 'INSTITUTION_ADMIN' | 'LEADER' | 'MISSIONARY') =>
     api.get<Member[]>(`/institutions/${institutionId}/members${role ? `?role=${role}` : ''}`),
@@ -84,14 +91,14 @@ export const adminApi = {
   listGroups: (institutionId: string) => api.get<Group[]>(`/institutions/${institutionId}/groups`),
   createGroup: (
     institutionId: string,
-    dto: { name: string; description?: string; locality?: string; leaderId: string },
+    dto: { name: string; description?: string; locality?: string; leaderIds?: string[] },
   ) => api.post<Group>(`/institutions/${institutionId}/groups`, dto),
   getGroup: (institutionId: string, groupId: string) =>
     api.get<GroupDetail>(`/institutions/${institutionId}/groups/${groupId}`),
   updateGroup: (
     institutionId: string,
     groupId: string,
-    dto: { name?: string; description?: string; locality?: string; leaderId?: string },
+    dto: { name?: string; description?: string; locality?: string; leaderIds?: string[] },
   ) => api.patch<Group>(`/institutions/${institutionId}/groups/${groupId}`, dto),
 
   listInvites: (institutionId: string) => api.get<InviteSummary[]>(`/institutions/${institutionId}/invites`),
@@ -105,4 +112,13 @@ export const adminApi = {
     ),
   resendInvite: (inviteId: string) =>
     api.post<{ activationLink: string; expiresAt: string }>(`/invites/${inviteId}/resend`),
+
+  updateMember: (
+    institutionId: string,
+    userId: string,
+    data: { fullName?: string; email?: string; phone?: string; password?: string },
+  ) => api.patch(`/institutions/${institutionId}/members/${userId}`, data),
+
+  removeMember: (institutionId: string, userId: string) =>
+    api.delete(`/institutions/${institutionId}/members/${userId}`),
 }

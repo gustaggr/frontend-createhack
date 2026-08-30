@@ -1,8 +1,9 @@
 import { Building2, Plus } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import DashboardLayout from '../../components/dashboard/DashboardLayout'
-import Modal from '../../components/dashboard/Modal'
+
+import { Button } from '../../components/ui/Button'
+import { Modal } from '../../components/ui/Modal'
 import { adminApi, type Institution } from '../../lib/adminApi'
 import { ApiError } from '../../lib/api'
 
@@ -40,7 +41,7 @@ function CreateInstitutionForm({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Nome legal</label>
         <input required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
@@ -86,13 +87,11 @@ function CreateInstitutionForm({ onCreated }: { onCreated: () => void }) {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full rounded-xl bg-brand-600 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
-      >
-        {submitting ? 'Criando…' : 'Criar instituição'}
-      </button>
+      <div className="pt-2">
+        <Button type="submit" isLoading={submitting} className="w-full">
+          {submitting ? 'Criando…' : 'Criar instituição'}
+        </Button>
+      </div>
     </form>
   )
 }
@@ -112,32 +111,29 @@ export default function InstitutionsPage() {
   useEffect(load, [])
 
   return (
-    <DashboardLayout>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Instituições</h1>
-          <p className="text-sm text-slate-500">Igrejas e organizações que usam a plataforma.</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Instituições</h1>
+          <p className="mt-1 text-sm font-medium text-white/80">Igrejas e organizações que usam a plataforma.</p>
         </div>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          <Plus size={16} />
+        <Button variant="white" onClick={() => setModalOpen(true)}>
+          <Plus size={16} className="mr-2" />
           Nova instituição
-        </button>
+        </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-brand-100 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
         <table className="w-full min-w-[520px] text-sm">
           <thead>
-            <tr className="border-b border-brand-50 text-left text-xs font-medium text-slate-400">
+            <tr className="border-b border-slate-100 text-left text-xs font-medium text-slate-400">
               <th className="px-4 py-3 font-medium">Instituição</th>
               <th className="px-4 py-3 font-medium">País</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-brand-50">
+          <tbody className="divide-y divide-slate-100">
             {institutions?.map((inst) => (
               <tr key={inst.id}>
                 <td className="px-4 py-3">
@@ -182,6 +178,6 @@ export default function InstitutionsPage() {
           />
         </Modal>
       )}
-    </DashboardLayout>
+    </>
   )
 }

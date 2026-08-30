@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
 import { useAuth } from '../context/AuthContext'
 import { api, ApiError } from '../lib/api'
 
@@ -86,13 +88,13 @@ export default function InviteAccept() {
   if (loadError || !invite) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-brand-50 px-4">
-        <div className="w-full max-w-sm rounded-2xl border border-brand-100 bg-white p-6 text-center shadow-sm">
+        <Card className="w-full max-w-sm shadow-sm border border-slate-100 text-center">
           <h1 className="text-lg font-semibold text-slate-900">Convite indisponível</h1>
           <p className="mt-2 text-sm text-slate-600">{loadError ?? 'Convite não encontrado.'}</p>
           <Link to="/login" className="mt-4 inline-block text-sm text-brand-600 hover:underline">
             Ir para o login
           </Link>
-        </div>
+        </Card>
       </div>
     )
   }
@@ -105,13 +107,13 @@ export default function InviteAccept() {
     }
     return (
       <div className="flex min-h-screen items-center justify-center bg-brand-50 px-4">
-        <div className="w-full max-w-sm rounded-2xl border border-brand-100 bg-white p-6 text-center shadow-sm">
+        <Card className="w-full max-w-sm shadow-sm border border-slate-100 text-center">
           <h1 className="text-lg font-semibold text-slate-900">Convite indisponível</h1>
           <p className="mt-2 text-sm text-slate-600">{messages[invite.status]}</p>
           <Link to="/login" className="mt-4 inline-block text-sm text-brand-600 hover:underline">
             Ir para o login
           </Link>
-        </div>
+        </Card>
       </div>
     )
   }
@@ -139,8 +141,9 @@ export default function InviteAccept() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit}>
+          <Card className="shadow-sm border border-slate-100">
+            <div className="space-y-4">
             <div>
               <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
                 Crie sua senha
@@ -202,14 +205,11 @@ export default function InviteAccept() {
               </p>
             )}
 
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="w-full rounded-xl bg-brand-600 py-3 text-base font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
-            >
+            <Button type="submit" disabled={!canSubmit} isLoading={submitting} className="w-full" size="lg">
               {submitting ? 'Ativando…' : 'Ativar minha conta'}
-            </button>
-          </div>
+            </Button>
+            </div>
+          </Card>
         </form>
       </div>
     </div>

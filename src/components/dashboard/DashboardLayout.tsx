@@ -13,7 +13,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="flex h-screen overflow-hidden bg-brand-50">
       <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
+        <div className="absolute inset-x-0 top-0 -z-10 h-[200px] rounded-b-[40px] bg-brand-600" aria-hidden />
+
         <button
           onClick={() => setMenuOpen(true)}
           aria-label="Abrir menu"
@@ -22,7 +24,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <Menu size={20} />
         </button>
 
-        <main className="flex-1 px-4 py-5 pt-16 sm:px-6 sm:py-6 md:pt-6">{children}</main>
+        <main className="relative flex-1 px-4 py-6 pt-16 sm:px-6 md:pt-8">{children}</main>
       </div>
     </div>
   )

@@ -3,12 +3,14 @@ import { AuthProvider } from './context/AuthContext'
 import GroupDetailPage from './pages/admin/GroupDetailPage'
 import InstitutionDetailPage from './pages/admin/InstitutionDetailPage'
 import InstitutionsPage from './pages/admin/InstitutionsPage'
+import AdminMaterialsPage from './pages/admin/MaterialsPage'
 import MissionaryProfilePage from './pages/admin/MissionaryProfilePage'
 import MyGroupsPage from './pages/admin/MyGroupsPage'
 import WebhookPage from './pages/admin/WebhookPage'
 import Home from './pages/Home'
 import InviteAccept from './pages/InviteAccept'
 import Login from './pages/Login'
+import MaterialsPage from './pages/MaterialsPage'
 import NotFound from './pages/NotFound'
 import ProfilePage from './pages/ProfilePage'
 import QuestPage from './pages/QuestPage'
@@ -19,6 +21,8 @@ import {
 } from './routes/AdminRoute'
 import ProtectedRoute from './routes/ProtectedRoute'
 
+import { DashboardLayout } from './components/layout/DashboardLayout'
+
 function App() {
   return (
     <AuthProvider>
@@ -28,10 +32,20 @@ function App() {
         <Route path="/invite/:token" element={<InviteAccept />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/home" element={<Home />} />
+          <Route element={<DashboardLayout />}>
+            <Route path="/home" element={<Home />} />
           <Route path="/quest" element={<QuestPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/my-groups" element={<MyGroupsPage />} />
+          <Route path="/materials" element={<MaterialsPage />} />
+          <Route
+            path="/admin/institutions/:institutionId/materials"
+            element={
+              <RequireInstitutionOrLeaderAccess>
+                <AdminMaterialsPage />
+              </RequireInstitutionOrLeaderAccess>
+            }
+          />
           <Route
             path="/admin/institutions"
             element={
@@ -72,6 +86,7 @@ function App() {
               </RequireSuperAdmin>
             }
           />
+        </Route>
         </Route>
 
         <Route path="*" element={<NotFound />} />

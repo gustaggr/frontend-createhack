@@ -2,6 +2,7 @@ import {
   Building2,
   ChevronsLeft,
   ChevronsRight,
+  FileVideo,
   Home,
   LogOut,
   User,
@@ -57,7 +58,17 @@ function useNavItems(): NavItem[] {
     (r) => r.role === 'LEADER' && r.status === 'ACTIVE' && r.institutionId,
   )
   if (leaderRole) {
-    items.splice(1, 0, { icon: UsersRound, label: 'Meus grupos', to: '/my-groups' })
+    items.splice(
+      1,
+      0,
+      { icon: UsersRound, label: 'Meus grupos', to: '/my-groups' },
+      { icon: FileVideo, label: 'Materiais', to: `/admin/institutions/${leaderRole.institutionId}/materials` },
+    )
+  }
+
+  const missionaryRole = user?.roles.find((r) => r.role === 'MISSIONARY' && r.status === 'ACTIVE')
+  if (missionaryRole) {
+    items.splice(1, 0, { icon: FileVideo, label: 'Materiais', to: '/materials' })
   }
 
   return items
@@ -76,13 +87,52 @@ function Logo({ collapsed }: { collapsed: boolean }) {
 
 function navLinkClass(collapsed: boolean) {
   return ({ isActive }: { isActive: boolean }) =>
-    `flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+    `flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
       collapsed ? 'justify-center' : ''
     } ${
       isActive
-        ? 'bg-brand-600 text-white shadow-md shadow-brand-200'
+        ? 'bg-brand-600 text-white shadow-lg shadow-brand-200/60'
         : 'text-slate-500 hover:bg-brand-50 hover:text-brand-600'
     }`
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: 'Administrador',
+  INSTITUTION_ADMIN: 'Diretor(a)',
+  LEADER: 'Líder',
+  MISSIONARY: 'Missionário(a)',
+  FAMILY: 'Familiar',
+}
+
+function UserCard({ collapsed }: { collapsed: boolean }) {
+  const { user, activeRole } = useAuth()
+  if (!user) return null
+
+  const initial = (user.preferredName ?? user.fullName).charAt(0).toUpperCase()
+
+  if (collapsed) {
+    return (
+      <div className="flex h-10 w-10 items-center justify-center self-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">
+        {initial}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl bg-brand-50 px-3 py-2.5">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">
+        {initial}
+      </div>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-slate-800">
+          {user.preferredName ?? user.fullName}
+        </p>
+        <p className="truncate text-xs text-slate-500">
+          {activeRole ? ROLE_LABELS[activeRole.role] : ''}
+        </p>
+      </div>
+    </div>
+  )
 }
 
 function NavList({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
@@ -116,7 +166,9 @@ function SidebarFooter({ collapsed, onNavigate }: { collapsed: boolean; onNaviga
   }
 
   return (
-    <div className="flex w-full flex-col gap-1 border-t border-brand-50 pt-3">
+    <div className="flex w-full flex-col gap-2 border-t border-brand-50 pt-3">
+      <UserCard collapsed={collapsed} />
+
       <NavLink
         to="/profile"
         title={collapsed ? 'Meu perfil' : undefined}
@@ -142,8 +194,28 @@ function SidebarFooter({ collapsed, onNavigate }: { collapsed: boolean; onNaviga
   )
 }
 
+function getStoredCollapsed(): boolean {
+  try {
+    return localStorage.getItem('sidebarCollapsed') === 'true'
+  } catch {
+    return false
+  }
+}
+
 export default function Sidebar({ open, onClose }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(getStoredCollapsed)
+
+  function toggleCollapsed() {
+    setCollapsed((v) => {
+      const next = !v
+      try {
+        localStorage.setItem('sidebarCollapsed', String(next))
+      } catch {
+        // localStorage indisponível (modo privado, etc.) — ignora persistência
+      }
+      return next
+    })
+  }
 
   return (
     <>
@@ -160,7 +232,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <SidebarFooter collapsed={collapsed} />
 
           <button
-            onClick={() => setCollapsed((v) => !v)}
+            onClick={toggleCollapsed}
             aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
             className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-brand-50 hover:text-brand-600 ${
               collapsed ? 'justify-center' : ''

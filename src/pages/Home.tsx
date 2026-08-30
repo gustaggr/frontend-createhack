@@ -1,4 +1,4 @@
-import DashboardLayout from '../components/dashboard/DashboardLayout'
+
 import OverviewDashboard, { type OverviewScope } from '../components/dashboard/OverviewDashboard'
 import { useAuth, type UserRoleContext } from '../context/AuthContext'
 import MissionaryHome from './MissionaryHome'
@@ -7,7 +7,7 @@ const ROLE_LABELS: Record<UserRoleContext['role'], string> = {
   SUPER_ADMIN: 'Administrador da plataforma',
   INSTITUTION_ADMIN: 'Administrador da instituição',
   LEADER: 'Líder — Meus liderados',
-  MISSIONARY: 'Missionário(a) — Meu cuidado',
+  MISSIONARY: 'Missionário(a)',
   FAMILY: 'Familiar',
 }
 
@@ -34,15 +34,17 @@ export default function Home() {
     overview = { title: OVERVIEW_TITLES.SUPER_ADMIN, scope: { kind: 'platform' } }
   }
 
+  const isMissionary = activeRole?.role === 'MISSIONARY';
+
   return (
-    <DashboardLayout>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">
+          <h1 className={`text-2xl font-bold tracking-tight ${isMissionary ? 'text-slate-900' : 'text-white'}`}>
             Olá, {user.preferredName ?? user.fullName}
           </h1>
           {activeRole && (
-            <p className="text-sm text-slate-500">
+            <p className={`mt-1 font-medium ${isMissionary ? 'text-slate-500' : 'text-white/80'}`}>
               {ROLE_LABELS[activeRole.role]}
               {activeRole.institutionName ? ` · ${activeRole.institutionName}` : ''}
             </p>
@@ -55,11 +57,10 @@ export default function Home() {
               <button
                 key={role.id}
                 onClick={() => setActiveRole(role)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                  activeRole?.id === role.id
-                    ? 'bg-brand-600 text-white'
-                    : 'bg-white text-slate-600 ring-1 ring-brand-200 hover:bg-brand-50'
-                }`}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${activeRole?.id === role.id
+                    ? isMissionary ? 'bg-[#F97316] text-white shadow-sm' : 'bg-white text-brand-700'
+                    : isMissionary ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' : 'bg-white/10 text-white ring-1 ring-white/30 hover:bg-white/20'
+                  }`}
               >
                 {ROLE_LABELS[role.role]}
               </button>
@@ -75,6 +76,6 @@ export default function Home() {
       ) : (
         <p className="text-sm text-slate-400">Nenhum painel disponível para este papel ainda.</p>
       )}
-    </DashboardLayout>
+    </>
   )
 }

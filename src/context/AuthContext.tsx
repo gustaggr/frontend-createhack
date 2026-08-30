@@ -16,6 +16,7 @@ export interface AuthUser {
   email: string
   fullName: string
   preferredName: string | null
+  phone: string | null
   roles: UserRoleContext[]
 }
 

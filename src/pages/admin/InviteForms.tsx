@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from 'react'
+import { Button } from '../../components/ui/Button'
+import { CustomSelect } from '../../components/ui/CustomSelect'
 import { adminApi, type Role } from '../../lib/adminApi'
 import { ApiError } from '../../lib/api'
 
@@ -47,7 +49,7 @@ export function InviteForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Nome completo</label>
         <input required value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
@@ -65,20 +67,16 @@ export function InviteForm({
 
       {role === 'MISSIONARY' && !fixedGroupId && (
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Grupo</label>
-          <select
-            value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
-            className={inputClass}
-            required
-          >
-            <option value="">Selecione um grupo</option>
-            {groupOptions?.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
+          <CustomSelect
+            label="Grupo"
+            value={groupOptions?.find((g) => g.id === groupId)?.name ?? ''}
+            onChange={(name) => {
+              const group = groupOptions?.find((g) => g.name === name)
+              setGroupId(group?.id ?? '')
+            }}
+            options={groupOptions?.map((g) => g.name) ?? []}
+            placeholder="Selecione um grupo"
+          />
           {groupOptions?.length === 0 && (
             <p className="mt-1 text-xs text-slate-400">
               Crie um grupo primeiro para poder convidar membros.
@@ -89,13 +87,11 @@ export function InviteForm({
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full rounded-xl bg-brand-600 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
-      >
-        {submitting ? 'Convidando…' : 'Enviar convite'}
-      </button>
+      <div className="pt-2">
+        <Button type="submit" isLoading={submitting} className="w-full">
+          {submitting ? 'Convidando…' : 'Enviar convite'}
+        </Button>
+      </div>
     </form>
   )
 }

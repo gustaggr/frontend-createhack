@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import { Area, AreaChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { checkinApi, type DashboardOverview, type ScoreBand } from '../../lib/checkinApi'
 import { BAND_HEX, BAND_LABELS } from '../../lib/checkinLabels'
+import { Card, CardHeader } from '../ui/Card'
+import { DashboardStatCard } from './DashboardStatCard'
 
 function formatDayLabel(iso: string): string {
   const [, month, day] = iso.split('-')
@@ -66,7 +68,9 @@ export default function OverviewDashboard({
   }, [scope.kind, scope.kind === 'institution' ? scope.institutionId : undefined])
 
   if (error) {
-    return <p className="rounded-2xl border border-brand-100 bg-white p-6 text-sm text-red-600">{error}</p>
+    return (
+      <Card className="shadow-sm border border-slate-100 text-sm text-red-600">{error}</Card>
+    )
   }
   if (!data) return null
 
@@ -75,15 +79,15 @@ export default function OverviewDashboard({
 
   return (
     <div>
-      <div className="mb-5">
-        <h1 className="text-xl font-bold text-slate-900">{title}</h1>
-        {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+      <div className="mb-6">
+        <h1 className="text-lg font-bold text-white">{title}</h1>
+        {subtitle && <p className="text-sm font-medium text-white/80">{subtitle}</p>}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3 xl:gap-6">
         <div className="flex flex-col gap-4 sm:gap-5 xl:col-span-2 xl:gap-6">
-          <div className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-base font-semibold text-slate-900">Tendência de score (14 dias)</h2>
+          <Card className="shadow-sm border border-slate-100">
+            <CardHeader title="Tendência de score (14 dias)" className="mb-2" />
             <div className="mt-4 h-56 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trendData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
@@ -114,38 +118,34 @@ export default function OverviewDashboard({
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </Card>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                <CalendarCheck size={20} />
-              </div>
-              <p className="mt-3 text-sm text-slate-500">Responderam hoje</p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">
-                {data.todayAnsweredCount}
-                <span className="text-sm font-normal text-slate-400"> / {data.totalMissionaries}</span>
-              </p>
-            </div>
+            <DashboardStatCard
+              title="Responderam hoje"
+              value={`${data.todayAnsweredCount} / ${data.totalMissionaries}`}
+              icon={CalendarCheck}
+              iconColorClass="text-brand-600"
+              iconBgClass="bg-brand-50"
+            />
 
-            <div className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                <HeartPulse size={20} />
-              </div>
-              <p className="mt-3 text-sm text-slate-500">Eventos de cuidado abertos</p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">
-                {data.openCareEvents}
-                {data.criticalOpenCareEvents > 0 && (
-                  <span className="text-sm font-normal text-red-600"> · {data.criticalOpenCareEvents} crítico(s)</span>
-                )}
-              </p>
-            </div>
+            <DashboardStatCard
+              title="Eventos de cuidado abertos"
+              value={
+                data.criticalOpenCareEvents > 0
+                  ? `${data.openCareEvents} · ${data.criticalOpenCareEvents} crítico(s)`
+                  : data.openCareEvents
+              }
+              icon={HeartPulse}
+              iconColorClass="text-red-600"
+              iconBgClass="bg-red-50"
+            />
           </div>
         </div>
 
         <div className="flex flex-col gap-4 sm:gap-5 xl:gap-6">
-          <div className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-base font-semibold text-slate-900">Situação hoje</h2>
+          <Card className="shadow-sm border border-slate-100">
+            <CardHeader title="Situação hoje" className="mb-2" />
             {bandTotal === 0 ? (
               <p className="mt-4 text-sm text-slate-400">Ninguém respondeu hoje ainda.</p>
             ) : (
@@ -187,9 +187,9 @@ export default function OverviewDashboard({
                 </dl>
               </div>
             )}
-          </div>
+          </Card>
 
-          <div className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm sm:p-6">
+          <Card className="shadow-sm border border-slate-100">
             <div className="flex items-center gap-2 text-slate-900">
               <AlertTriangle size={18} className="text-amber-600" />
               <h2 className="text-base font-semibold">Precisa de atenção</h2>
@@ -213,12 +213,12 @@ export default function OverviewDashboard({
                 <p className="py-3 text-center text-sm text-slate-400">Tudo tranquilo por aqui.</p>
               )}
             </div>
-          </div>
+          </Card>
 
-          <div className="flex items-center gap-2 rounded-2xl border border-brand-100 bg-white p-4 text-sm text-slate-500 shadow-sm">
+          <Card className="shadow-sm border border-slate-100 flex items-center gap-2 p-4 text-sm text-slate-500">
             <Users size={16} className="text-brand-600" />
             {data.totalMissionaries} missionário(s) acompanhado(s)
-          </div>
+          </Card>
         </div>
       </div>
     </div>

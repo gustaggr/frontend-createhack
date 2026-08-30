@@ -108,8 +108,8 @@ export interface ProfileAverages {
 }
 
 export interface MissionaryProfile {
-  missionary: { id: string; fullName: string; preferredName: string | null; email: string }
-  group: { id: string; name: string; leaderName: string } | null
+  missionary: { id: string; fullName: string; preferredName: string | null; email: string; phone: string | null }
+  group: { id: string; name: string; leaderNames: string[] } | null
   range: { from: string; to: string }
   averages: ProfileAverages
   daysInRange: DayInRange[]
